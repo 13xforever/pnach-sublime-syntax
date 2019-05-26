@@ -1,0 +1,92 @@
+%YAML 1.2
+---
+name: pnach
+file_extensions:
+  - pnach
+scope: source.pnach
+
+contexts:
+  main:
+    - include: valid
+    - include: comment
+#    - include: invalid_all
+
+  comment:
+    - match: (?i)^\s*(//)(.*)
+      scope: comment.line.pnach
+      captures:
+        1: punctuation.definition.comment.pnach
+
+  valid:
+    - match: (?i)(gametitle)\s*(=)\s*(.*)
+      captures:
+        1: keyword.declaration.class.pnach
+        2: keyword.operator.assignment.pnach
+        3: string.unquoted.title.pnach
+
+    - match: (?i)(comment)\s*(=)\s*(.*)
+      captures:
+        1: keyword.declaration.interface.pnach
+        2: keyword.operator.assignment.pnach
+        3: string.unquoted.comment.pnach
+
+    - match: (?i)(patch)\s*(=)
+      captures:
+        1: keyword.declaration.function.pnach
+        2: keyword.operator.assignment.pnach
+      set: code_state
+
+  code_state:
+    - match: (?i)((0)|(1)|(.))(,)
+      captures:
+        1: keyword.control.conditional.select.pnach
+        2: markup.deleted.pnach
+        3: markup.inserted.pnach
+        4: invalid.illegal.pnach
+        5: punctuation.separator.sequence.pnach
+      set: code_target
+    - match: .
+      pop: true
+
+  code_target:
+    - match: (?i)((EE|IOP)|(\w+))(,)
+      captures:
+        1: storage.type.impl.pnach
+        3: invalid.illegal.pnach
+        4: punctuation.separator.sequence.pnach
+      set: code_address
+    - match: .
+      pop: true
+
+  code_address:
+    - match: (?i)((([0-4DE])|(9F)|(.))(([0-9A-F]{7})|(.*)))(,)
+      captures:
+        1: constant.numeric.integer.hexadecimal.pnach
+        2: keyword.control.conditional.case.pnach
+        4: invalid.deprecated.pnach
+        5: invalid.illegal.pnach
+        6: variable.parameter.pnach
+        8: invalid.illegal.pnach
+        9: punctuation.separator.sequence.pnach
+      set: code_type
+    - match: .
+      pop: true
+
+  code_type:
+    - match: (?i)((extended|byte|short|word)|(.*))(,)
+      captures:
+        1: storage.type.trait.pnach
+        3: invalid.illegal.pnach
+        4: punctuation.separator.sequence.pnach
+      set: code_value
+    - match: .
+      pop: true
+
+  code_value:
+    - match: (?i)(([0-9A-F]{8})|(.*))$
+      captures:
+        1: constant.numeric.integer.hexadecimal.pnach
+        3: invalid.illegal.pnach
+      pop: true
+    - match: .
+      pop: true
